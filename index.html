@@ -1,177 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Space Escape</title>
 
-<style>
+<link rel="stylesheet" href="style.css">
 
-body{
-margin:0;
-overflow:hidden;
-background:black;
-font-family:Arial;
-color:white;
-}
-
-#ui{
-position:absolute;
-top:10px;
-left:10px;
-font-size:20px;
-}
-
-#gameOver{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-font-size:40px;
-display:none;
-text-align:center;
-}
-
-button{
-padding:10px 20px;
-font-size:20px;
-cursor:pointer;
-}
-
-</style>
 </head>
 
 <body>
 
+<div id="menu">
+
+<h1>SPACE ESCAPE</h1>
+
+<button onclick="startGame()">START GAME</button>
+
+</div>
+
 <canvas id="game"></canvas>
 
-<div id="ui">
+<div id="scoreUI">
+
 Score: <span id="score">0</span>
+
 </div>
 
-<div id="gameOver">
-GAME OVER<br><br>
-<button onclick="restart()">Restart</button>
-</div>
-
-<script>
-
-const canvas = document.getElementById("game")
-const ctx = canvas.getContext("2d")
-
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
-
-let ship = {
-x:200,
-y:300,
-size:30,
-speed:6
-}
-
-let meteors = []
-let score = 0
-let gameRunning = true
-
-const keys = {}
-
-document.addEventListener("keydown",e=>keys[e.key]=true)
-document.addEventListener("keyup",e=>keys[e.key]=false)
-
-function spawnMeteor(){
-
-meteors.push({
-x:Math.random()*canvas.width,
-y:-50,
-size:20+Math.random()*30,
-speed:3+Math.random()*4
-})
-
-}
-
-setInterval(spawnMeteor,1000)
-
-function update(){
-
-if(!gameRunning) return
-
-if(keys["ArrowUp"]) ship.y -= ship.speed
-if(keys["ArrowDown"]) ship.y += ship.speed
-if(keys["ArrowLeft"]) ship.x -= ship.speed
-if(keys["ArrowRight"]) ship.x += ship.speed
-
-ship.x = Math.max(0,Math.min(canvas.width-ship.size,ship.x))
-ship.y = Math.max(0,Math.min(canvas.height-ship.size,ship.y))
-
-meteors.forEach(m=>{
-
-m.y += m.speed
-
-if(
-ship.x < m.x + m.size &&
-ship.x + ship.size > m.x &&
-ship.y < m.y + m.size &&
-ship.y + ship.size > m.y
-){
-gameOver()
-}
-
-})
-
-meteors = meteors.filter(m=>m.y < canvas.height+100)
-
-score++
-document.getElementById("score").textContent = score
-
-}
-
-function draw(){
-
-ctx.clearRect(0,0,canvas.width,canvas.height)
-
-ctx.fillStyle="cyan"
-ctx.fillRect(ship.x,ship.y,ship.size,ship.size)
-
-ctx.fillStyle="orange"
-
-meteors.forEach(m=>{
-ctx.beginPath()
-ctx.arc(m.x,m.y,m.size,0,Math.PI*2)
-ctx.fill()
-})
-
-}
-
-function loop(){
-
-update()
-draw()
-
-requestAnimationFrame(loop)
-
-}
-
-function gameOver(){
-
-gameRunning = false
-document.getElementById("gameOver").style.display="block"
-
-}
-
-function restart(){
-
-meteors=[]
-score=0
-ship.x=200
-ship.y=300
-gameRunning=true
-
-document.getElementById("gameOver").style.display="none"
-
-}
-
-loop()
-
-</script>
+<script src="game.js"></script>
 
 </body>
 </html>

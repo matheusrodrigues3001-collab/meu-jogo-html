@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Space Shooter</title>
 
-<style>
 
 body{
 margin:0;
@@ -32,19 +26,19 @@ position:absolute;
 width:2px;
 height:2px;
 background:white;
-opacity:0.8;
 }
 
-/* nave */
+/* nave triangular */
 
 #player{
 position:absolute;
 bottom:20px;
 left:370px;
-width:60px;
-height:60px;
-background:url("https://i.imgur.com/7QZ6YQK.png");
-background-size:cover;
+width:0;
+height:0;
+border-left:30px solid transparent;
+border-right:30px solid transparent;
+border-bottom:60px solid cyan;
 }
 
 /* tiro */
@@ -54,7 +48,6 @@ position:absolute;
 width:6px;
 height:15px;
 background:yellow;
-z-index:10;
 }
 
 /* inimigos */
@@ -118,7 +111,7 @@ let enemies = []
 let boss = null
 let bossLife = 20
 
-// estrelas animadas
+// estrelas
 
 function createStars(){
 
@@ -147,7 +140,7 @@ star.style.top=star.y+"px"
 
 createStars()
 
-// movimento da nave
+// movimento nave
 
 document.addEventListener("keydown",e=>{
 
@@ -179,7 +172,7 @@ bullets.push(bullet)
 
 }
 
-// criar inimigos
+// inimigos
 
 function spawnEnemy(){
 
@@ -232,11 +225,11 @@ game.appendChild(boss)
 
 }
 
-// loop do jogo
+// loop jogo
 
 function update(){
 
-// mover tiros
+// tiros
 
 bullets.forEach((b,i)=>{
 
@@ -250,7 +243,7 @@ bullets.splice(i,1)
 
 })
 
-// mover inimigos
+// inimigos
 
 enemies.forEach((e,ei)=>{
 

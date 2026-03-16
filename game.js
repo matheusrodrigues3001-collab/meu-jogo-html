@@ -2,11 +2,11 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 let player = {
-x: 380,
-y: 500,
-width: 60,
-height: 60,
-speed: 7
+    x: 370,
+    y: 500,
+    width: 60,
+    height: 60,
+    speed: 7
 };
 
 let asteroids = [];
@@ -19,89 +19,83 @@ playerImg.src = "images/R.png";
 const asteroidImg = new Image();
 asteroidImg.src = "images/1335902-middle.png";
 
-function startGame(){
+function startGame() {
 
-document.getElementById("menu").style.display = "none";
+    document.getElementById("menu").style.display = "none";
 
-gameRunning = true;
+    gameRunning = true;
 
-spawnAsteroid();
+    setInterval(spawnAsteroid, 1200);
 
-gameLoop();
+    gameLoop();
+}
+
+function spawnAsteroid() {
+
+    asteroids.push({
+        x: Math.random() * (canvas.width - 60),
+        y: -60,
+        width: 60,
+        height: 60,
+        speed: 3
+    });
 
 }
 
-function spawnAsteroid(){
+document.addEventListener("keydown", function (e) {
 
-setInterval(()=>{
+    if (e.key === "ArrowLeft") {
+        player.x -= player.speed;
+    }
 
-asteroids.push({
-
-x:Math.random()*760,
-y:-60,
-width:60,
-height:60,
-speed:3+Math.random()*3
+    if (e.key === "ArrowRight") {
+        player.x += player.speed;
+    }
 
 });
 
-},1000);
+function update() {
+
+    for (let i = 0; i < asteroids.length; i++) {
+
+        asteroids[i].y += asteroids[i].speed;
+
+        if (asteroids[i].y > canvas.height) {
+
+            asteroids.splice(i, 1);
+            score++;
+
+            document.getElementById("score").innerText = score;
+
+        }
+
+    }
 
 }
 
-document.addEventListener("keydown",(e)=>{
+function draw() {
 
-if(e.key==="ArrowLeft"){
-player.x-=player.speed;
-}
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-if(e.key==="ArrowRight"){
-player.x+=player.speed;
-}
+    ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
 
-});
+    for (let i = 0; i < asteroids.length; i++) {
 
-function update(){
+        let a = asteroids[i];
 
-asteroids.forEach(a=>{
-a.y+=a.speed;
-});
+        ctx.drawImage(asteroidImg, a.x, a.y, a.width, a.height);
 
-asteroids = asteroids.filter(a=>{
-
-if(a.y>600){
-score++;
-document.getElementById("score").innerText=score;
-return false;
-}
-
-return true;
-
-});
+    }
 
 }
 
-function draw(){
+function gameLoop() {
 
-ctx.clearRect(0,0,canvas.width,canvas.height);
+    if (!gameRunning) return;
 
-ctx.drawImage(playerImg,player.x,player.y,player.width,player.height);
+    update();
+    draw();
 
-asteroids.forEach(a=>{
-
-ctx.drawImage(asteroidImg,a.x,a.y,a.width,a.height);
-
-});
-
-}
-
-function gameLoop(){
-
-if(!gameRunning) return;
-
-update();
-draw();
-
-requestAnimationFrame(gameLoop);
+    requestAnimationFrame(gameLoop);
 
 }

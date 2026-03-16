@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Space Escape</title>
+<title>Space Shooter</title>
 
 <style>
 
@@ -21,6 +21,7 @@ height:600px;
 margin:auto;
 background:black;
 border:2px solid white;
+overflow:hidden;
 }
 
 #player{
@@ -28,16 +29,23 @@ position:absolute;
 bottom:20px;
 left:370px;
 width:60px;
-height:60px;
+height:20px;
 background:cyan;
 }
 
-.asteroid{
+.enemy{
 position:absolute;
-width:50px;
-height:50px;
+width:40px;
+height:40px;
 background:red;
 top:0;
+}
+
+.bullet{
+position:absolute;
+width:6px;
+height:15px;
+background:yellow;
 }
 
 </style>
@@ -45,65 +53,123 @@ top:0;
 
 <body>
 
-<h1>SPACE ESCAPE</h1>
+<h1>SPACE SHOOTER</h1>
 
 <div id="game">
-
 <div id="player"></div>
-
 </div>
 
 <p>Score: <span id="score">0</span></p>
 
 <script>
 
-let player = document.getElementById("player")
 let game = document.getElementById("game")
+let player = document.getElementById("player")
 let score = 0
 
+let bullets = []
+let enemies = []
+
+// MOVIMENTO DA NAVE
 document.addEventListener("keydown",function(e){
 
 let left = player.offsetLeft
 
 if(e.key === "ArrowLeft"){
-player.style.left = (left - 20) + "px"
+player.style.left = Math.max(0,left-20)+"px"
 }
 
 if(e.key === "ArrowRight"){
-player.style.left = (left + 20) + "px"
+player.style.left = Math.min(740,left+20)+"px"
+}
+
+if(e.key === " "){
+shoot()
 }
 
 })
 
-function createAsteroid(){
+// TIRO
+function shoot(){
 
-let asteroid = document.createElement("div")
-asteroid.classList.add("asteroid")
+let bullet = document.createElement("div")
+bullet.classList.add("bullet")
 
-asteroid.style.left = Math.random()*750 + "px"
+bullet.style.left = (player.offsetLeft+27)+"px"
+bullet.style.bottom = "50px"
 
-game.appendChild(asteroid)
+game.appendChild(bullet)
 
-let fall = setInterval(function(){
+bullets.push(bullet)
 
-let top = asteroid.offsetTop
+}
 
-asteroid.style.top = top + 5 + "px"
+// CRIAR INIMIGOS
+function spawnEnemy(){
 
-if(top > 600){
+let enemy = document.createElement("div")
+enemy.classList.add("enemy")
 
-asteroid.remove()
+enemy.style.left = Math.random()*760+"px"
+
+game.appendChild(enemy)
+
+enemies.push(enemy)
+
+}
+
+setInterval(spawnEnemy,1200)
+
+// LOOP DO JOGO
+function gameLoop(){
+
+// mover tiros
+bullets.forEach((bullet,index)=>{
+
+bullet.style.top = (bullet.offsetTop-10)+"px"
+
+if(bullet.offsetTop < 0){
+bullet.remove()
+bullets.splice(index,1)
+}
+
+})
+
+// mover inimigos
+enemies.forEach((enemy,eIndex)=>{
+
+enemy.style.top = (enemy.offsetTop+3)+"px"
+
+// colisão
+bullets.forEach((bullet,bIndex)=>{
+
+if(
+bullet.offsetLeft < enemy.offsetLeft+40 &&
+bullet.offsetLeft+6 > enemy.offsetLeft &&
+bullet.offsetTop < enemy.offsetTop+40 &&
+bullet.offsetTop+15 > enemy.offsetTop
+){
+
+enemy.remove()
+bullet.remove()
+
+enemies.splice(eIndex,1)
+bullets.splice(bIndex,1)
+
 score++
 document.getElementById("score").innerText = score
-clearInterval(fall)
 
 }
 
-},30)
+})
+
+})
+
+requestAnimationFrame(gameLoop)
 
 }
 
-setInterval(createAsteroid,1000)
+gameLoop()
 
 </script>
 

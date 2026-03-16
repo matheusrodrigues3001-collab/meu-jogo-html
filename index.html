@@ -26,7 +26,7 @@ overflow:hidden;
 
 #player{
 position:absolute;
-bottom:20px;
+bottom:10px;
 left:370px;
 width:60px;
 height:20px;
@@ -38,7 +38,6 @@ position:absolute;
 width:40px;
 height:40px;
 background:red;
-top:0;
 }
 
 .bullet{
@@ -63,29 +62,32 @@ background:yellow;
 
 <script>
 
-let game = document.getElementById("game")
-let player = document.getElementById("player")
+const game = document.getElementById("game")
+const player = document.getElementById("player")
 let score = 0
+
+let playerX = 370
 
 let bullets = []
 let enemies = []
 
-// MOVIMENTO DA NAVE
-document.addEventListener("keydown",function(e){
-
-let left = player.offsetLeft
+// MOVIMENTO
+document.addEventListener("keydown", e => {
 
 if(e.key === "ArrowLeft"){
-player.style.left = Math.max(0,left-20)+"px"
+playerX -= 20
 }
 
 if(e.key === "ArrowRight"){
-player.style.left = Math.min(740,left+20)+"px"
+playerX += 20
 }
 
-if(e.key === " "){
+if(e.code === "Space"){
 shoot()
 }
+
+playerX = Math.max(0,Math.min(740,playerX))
+player.style.left = playerX + "px"
 
 })
 
@@ -93,10 +95,13 @@ shoot()
 function shoot(){
 
 let bullet = document.createElement("div")
-bullet.classList.add("bullet")
+bullet.className = "bullet"
 
-bullet.style.left = (player.offsetLeft+27)+"px"
-bullet.style.bottom = "50px"
+bullet.x = playerX + 27
+bullet.y = 540
+
+bullet.style.left = bullet.x + "px"
+bullet.style.top = bullet.y + "px"
 
 game.appendChild(bullet)
 
@@ -104,13 +109,17 @@ bullets.push(bullet)
 
 }
 
-// CRIAR INIMIGOS
+// INIMIGOS
 function spawnEnemy(){
 
 let enemy = document.createElement("div")
-enemy.classList.add("enemy")
+enemy.className = "enemy"
 
-enemy.style.left = Math.random()*760+"px"
+enemy.x = Math.random()*760
+enemy.y = 0
+
+enemy.style.left = enemy.x + "px"
+enemy.style.top = enemy.y + "px"
 
 game.appendChild(enemy)
 
@@ -120,41 +129,43 @@ enemies.push(enemy)
 
 setInterval(spawnEnemy,1200)
 
-// LOOP DO JOGO
-function gameLoop(){
+// LOOP
+function update(){
 
-// mover tiros
-bullets.forEach((bullet,index)=>{
+// tiros
+bullets.forEach((b,i)=>{
 
-bullet.style.top = (bullet.offsetTop-10)+"px"
+b.y -= 10
+b.style.top = b.y + "px"
 
-if(bullet.offsetTop < 0){
-bullet.remove()
-bullets.splice(index,1)
+if(b.y < 0){
+b.remove()
+bullets.splice(i,1)
 }
 
 })
 
-// mover inimigos
-enemies.forEach((enemy,eIndex)=>{
+// inimigos
+enemies.forEach((e,ei)=>{
 
-enemy.style.top = (enemy.offsetTop+3)+"px"
+e.y += 3
+e.style.top = e.y + "px"
 
 // colisão
-bullets.forEach((bullet,bIndex)=>{
+bullets.forEach((b,bi)=>{
 
 if(
-bullet.offsetLeft < enemy.offsetLeft+40 &&
-bullet.offsetLeft+6 > enemy.offsetLeft &&
-bullet.offsetTop < enemy.offsetTop+40 &&
-bullet.offsetTop+15 > enemy.offsetTop
+b.x < e.x + 40 &&
+b.x + 6 > e.x &&
+b.y < e.y + 40 &&
+b.y + 15 > e.y
 ){
 
-enemy.remove()
-bullet.remove()
+e.remove()
+b.remove()
 
-enemies.splice(eIndex,1)
-bullets.splice(bIndex,1)
+enemies.splice(ei,1)
+bullets.splice(bi,1)
 
 score++
 document.getElementById("score").innerText = score
@@ -165,13 +176,14 @@ document.getElementById("score").innerText = score
 
 })
 
-requestAnimationFrame(gameLoop)
+requestAnimationFrame(update)
 
 }
 
-gameLoop()
+update()
 
 </script>
 
 </body>
 </html>
+🎮 Controles

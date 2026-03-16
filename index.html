@@ -25,7 +25,7 @@ overflow:hidden;
 background:black;
 }
 
-/* fundo estrelado */
+/* estrelas */
 
 .star{
 position:absolute;
@@ -47,6 +47,16 @@ background:url("https://i.imgur.com/7QZ6YQK.png");
 background-size:cover;
 }
 
+/* tiro */
+
+.bullet{
+position:absolute;
+width:6px;
+height:15px;
+background:yellow;
+z-index:10;
+}
+
 /* inimigos */
 
 .enemy{
@@ -65,15 +75,6 @@ height:120px;
 background:purple;
 top:50px;
 left:340px;
-}
-
-/* tiro */
-
-.bullet{
-position:absolute;
-width:6px;
-height:15px;
-background:yellow;
 }
 
 /* explosão */
@@ -117,17 +118,17 @@ let enemies = []
 let boss = null
 let bossLife = 20
 
-// estrelas
+// estrelas animadas
 
 function createStars(){
 
 for(let i=0;i<100;i++){
 
-let star = document.createElement("div")
+let star=document.createElement("div")
 star.className="star"
 
-star.x = Math.random()*800
-star.y = Math.random()*600
+star.x=Math.random()*800
+star.y=Math.random()*600
 
 star.style.left=star.x+"px"
 star.style.top=star.y+"px"
@@ -135,7 +136,7 @@ star.style.top=star.y+"px"
 game.appendChild(star)
 
 setInterval(()=>{
-star.y += 1
+star.y+=1
 if(star.y>600) star.y=0
 star.style.top=star.y+"px"
 },30)
@@ -146,7 +147,7 @@ star.style.top=star.y+"px"
 
 createStars()
 
-// movimento
+// movimento da nave
 
 document.addEventListener("keydown",e=>{
 
@@ -155,7 +156,6 @@ if(e.key==="ArrowRight") playerX+=20
 if(e.code==="Space") shoot()
 
 playerX=Math.max(0,Math.min(740,playerX))
-
 player.style.left=playerX+"px"
 
 })
@@ -174,11 +174,12 @@ bullet.style.left=bullet.x+"px"
 bullet.style.top=bullet.y+"px"
 
 game.appendChild(bullet)
+
 bullets.push(bullet)
 
 }
 
-// inimigos
+// criar inimigos
 
 function spawnEnemy(){
 
@@ -194,6 +195,7 @@ enemy.style.left=enemy.x+"px"
 enemy.style.top=enemy.y+"px"
 
 game.appendChild(enemy)
+
 enemies.push(enemy)
 
 }
@@ -230,9 +232,11 @@ game.appendChild(boss)
 
 }
 
+// loop do jogo
+
 function update(){
 
-// tiros
+// mover tiros
 
 bullets.forEach((b,i)=>{
 
@@ -246,7 +250,7 @@ bullets.splice(i,1)
 
 })
 
-// inimigos
+// mover inimigos
 
 enemies.forEach((e,ei)=>{
 
@@ -267,6 +271,8 @@ location.reload()
 }
 
 }
+
+// colisão tiro
 
 bullets.forEach((b,bi)=>{
 

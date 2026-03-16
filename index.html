@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Space Shooter</title>
+
+<title>WW2 Battle</title>
 
 <style>
 
 body{
 margin:0;
-background:black;
+background:#2b2b2b;
 color:white;
-text-align:center;
 font-family:Arial;
+text-align:center;
 overflow:hidden;
 }
 
@@ -22,76 +24,78 @@ width:100%;
 max-width:800px;
 height:500px;
 margin:auto;
-border:2px solid white;
+background:#3a5f2b;
+border:3px solid white;
 overflow:hidden;
-background:black;
 }
 
-/* estrelas */
-
-.star{
-position:absolute;
-background:white;
-border-radius:50%;
-}
-
-/* nave */
+/* jogador */
 
 #player{
 position:absolute;
 bottom:20px;
 left:50%;
 transform:translateX(-50%);
-width:0;
-height:0;
-border-left:30px solid transparent;
-border-right:30px solid transparent;
-border-bottom:60px solid cyan;
+width:40px;
+height:40px;
+background:green;
+border-radius:5px;
 }
 
 /* tiro */
 
 .bullet{
 position:absolute;
-width:6px;
+width:5px;
 height:15px;
 background:yellow;
 }
 
-/* inimigos */
+/* inimigo */
 
 .enemy{
 position:absolute;
-width:40px;
-height:40px;
-background:red;
+width:35px;
+height:35px;
+background:brown;
 }
 
-/* botões mobile */
+/* explosão */
+
+.explosion{
+position:absolute;
+width:40px;
+height:40px;
+background:orange;
+border-radius:50%;
+}
+
+/* controles mobile */
 
 #controls{
 position:fixed;
-bottom:20px;
+bottom:15px;
 width:100%;
 display:flex;
 justify-content:space-around;
 }
 
 button{
-font-size:25px;
+font-size:22px;
 padding:15px 25px;
+background:#111;
+color:white;
 border:none;
 border-radius:10px;
-background:#222;
-color:white;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<h2>SPACE SHOOTER</h2>
+<h2>WW2 BATTLE</h2>
 
 <div id="game">
 <div id="player"></div>
@@ -114,60 +118,13 @@ const game = document.getElementById("game")
 const player = document.getElementById("player")
 
 let playerX = game.offsetWidth/2
-let score = 0
-let lives = 3
+let bullets=[]
+let enemies=[]
 
-let bullets = []
-let enemies = []
-let stars = []
+let score=0
+let lives=3
 
-// estrelas parallax
-
-function createStars(){
-
-for(let i=0;i<80;i++){
-
-let star=document.createElement("div")
-star.className="star"
-
-star.x=Math.random()*game.offsetWidth
-star.y=Math.random()*500
-star.layer=Math.floor(Math.random()*3)+1
-
-star.style.width=star.layer+"px"
-star.style.height=star.layer+"px"
-
-star.style.left=star.x+"px"
-star.style.top=star.y+"px"
-
-game.appendChild(star)
-
-stars.push(star)
-
-}
-
-}
-
-createStars()
-
-function moveStars(){
-
-stars.forEach(star=>{
-
-star.y+=star.layer
-
-if(star.y>500){
-star.y=0
-star.x=Math.random()*game.offsetWidth
-}
-
-star.style.top=star.y+"px"
-
-})
-
-}
-
-// controles
+// mover
 
 function moveLeft(){
 
@@ -181,7 +138,7 @@ player.style.left=playerX+"px"
 function moveRight(){
 
 playerX+=25
-playerX=Math.min(game.offsetWidth-60,playerX)
+playerX=Math.min(game.offsetWidth-40,playerX)
 
 player.style.left=playerX+"px"
 
@@ -194,7 +151,7 @@ function shoot(){
 let bullet=document.createElement("div")
 bullet.className="bullet"
 
-bullet.x=playerX+27
+bullet.x=playerX+18
 bullet.y=430
 
 bullet.style.left=bullet.x+"px"
@@ -213,7 +170,7 @@ function spawnEnemy(){
 let enemy=document.createElement("div")
 enemy.className="enemy"
 
-enemy.x=Math.random()*(game.offsetWidth-40)
+enemy.x=Math.random()*(game.offsetWidth-35)
 enemy.y=0
 
 enemy.style.left=enemy.x+"px"
@@ -227,11 +184,27 @@ enemies.push(enemy)
 
 setInterval(spawnEnemy,1200)
 
+// explosão
+
+function explosion(x,y){
+
+let exp=document.createElement("div")
+exp.className="explosion"
+
+exp.style.left=x+"px"
+exp.style.top=y+"px"
+
+game.appendChild(exp)
+
+setTimeout(()=>{
+exp.remove()
+},300)
+
+}
+
 // loop
 
 function update(){
-
-moveStars()
 
 bullets.forEach((b,i)=>{
 
@@ -268,19 +241,22 @@ location.reload()
 bullets.forEach((b,bi)=>{
 
 if(
-b.x < e.x+40 &&
-b.x+6 > e.x &&
-b.y < e.y+40 &&
+b.x < e.x+35 &&
+b.x+5 > e.x &&
+b.y < e.y+35 &&
 b.y+15 > e.y
 ){
 
-e.remove()
-b.remove()
+explosion(e.x,e.y)
 
-enemies.splice(ei,1)
+b.remove()
+e.remove()
+
 bullets.splice(bi,1)
+enemies.splice(ei,1)
 
 score++
+
 document.getElementById("score").innerText=score
 
 }

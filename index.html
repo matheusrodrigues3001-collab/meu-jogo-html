@@ -1,33 +1,111 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Space Escape</title>
 
-<link rel="stylesheet" href="style.css">
+<style>
 
+body{
+background:black;
+color:white;
+text-align:center;
+font-family:Arial;
+overflow:hidden;
+}
+
+#game{
+position:relative;
+width:800px;
+height:600px;
+margin:auto;
+background:black;
+border:2px solid white;
+}
+
+#player{
+position:absolute;
+bottom:20px;
+left:370px;
+width:60px;
+height:60px;
+background:cyan;
+}
+
+.asteroid{
+position:absolute;
+width:50px;
+height:50px;
+background:red;
+top:0;
+}
+
+</style>
 </head>
 
 <body>
 
-<div id="menu">
-
 <h1>SPACE ESCAPE</h1>
 
-<button onclick="startGame()">START GAME</button>
+<div id="game">
+
+<div id="player"></div>
 
 </div>
 
-<canvas id="game" width="800" height="600"></canvas>
+<p>Score: <span id="score">0</span></p>
 
-<div id="scoreUI">
-Score: <span id="score">0</span>
-</div>
+<script>
 
-<script src="game.js"></script>
+let player = document.getElementById("player")
+let game = document.getElementById("game")
+let score = 0
+
+document.addEventListener("keydown",function(e){
+
+let left = player.offsetLeft
+
+if(e.key === "ArrowLeft"){
+player.style.left = (left - 20) + "px"
+}
+
+if(e.key === "ArrowRight"){
+player.style.left = (left + 20) + "px"
+}
+
+})
+
+function createAsteroid(){
+
+let asteroid = document.createElement("div")
+asteroid.classList.add("asteroid")
+
+asteroid.style.left = Math.random()*750 + "px"
+
+game.appendChild(asteroid)
+
+let fall = setInterval(function(){
+
+let top = asteroid.offsetTop
+
+asteroid.style.top = top + 5 + "px"
+
+if(top > 600){
+
+asteroid.remove()
+score++
+document.getElementById("score").innerText = score
+clearInterval(fall)
+
+}
+
+},30)
+
+}
+
+setInterval(createAsteroid,1000)
+
+</script>
 
 </body>
 </html>

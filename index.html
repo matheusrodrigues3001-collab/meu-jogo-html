@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Space Shooter</title>
 
 <style>
@@ -17,8 +18,9 @@ overflow:hidden;
 
 #game{
 position:relative;
-width:800px;
-height:600px;
+width:100%;
+max-width:800px;
+height:500px;
 margin:auto;
 border:2px solid white;
 overflow:hidden;
@@ -38,7 +40,8 @@ border-radius:50%;
 #player{
 position:absolute;
 bottom:20px;
-left:370px;
+left:50%;
+transform:translateX(-50%);
 width:0;
 height:0;
 border-left:30px solid transparent;
@@ -64,14 +67,23 @@ height:40px;
 background:red;
 }
 
-/* explosão */
+/* botões mobile */
 
-.explosion{
-position:absolute;
-width:40px;
-height:40px;
-background:orange;
-border-radius:50%;
+#controls{
+position:fixed;
+bottom:20px;
+width:100%;
+display:flex;
+justify-content:space-around;
+}
+
+button{
+font-size:25px;
+padding:15px 25px;
+border:none;
+border-radius:10px;
+background:#222;
+color:white;
 }
 
 </style>
@@ -79,7 +91,7 @@ border-radius:50%;
 
 <body>
 
-<h1>SPACE SHOOTER</h1>
+<h2>SPACE SHOOTER</h2>
 
 <div id="game">
 <div id="player"></div>
@@ -90,18 +102,18 @@ Score: <span id="score">0</span> |
 Vidas: <span id="lives">3</span>
 </p>
 
-<!-- SONS -->
-
-<audio id="shootSound" src="https://assets.mixkit.co/active_storage/sfx/2967/2967-preview.mp3"></audio>
-<audio id="explosionSound" src="https://assets.mixkit.co/active_storage/sfx/3005/3005-preview.mp3"></audio>
-<audio id="gameoverSound" src="https://assets.mixkit.co/active_storage/sfx/1114/1114-preview.mp3"></audio>
+<div id="controls">
+<button onclick="moveLeft()">⬅️</button>
+<button onclick="shoot()">🔫</button>
+<button onclick="moveRight()">➡️</button>
+</div>
 
 <script>
 
 const game = document.getElementById("game")
 const player = document.getElementById("player")
 
-let playerX = 370
+let playerX = game.offsetWidth/2
 let score = 0
 let lives = 3
 
@@ -109,24 +121,21 @@ let bullets = []
 let enemies = []
 let stars = []
 
-// ⭐ criar estrelas parallax
+// estrelas parallax
 
 function createStars(){
 
-for(let i=0;i<120;i++){
+for(let i=0;i<80;i++){
 
-let star = document.createElement("div")
+let star=document.createElement("div")
 star.className="star"
 
-star.x=Math.random()*800
-star.y=Math.random()*600
-
+star.x=Math.random()*game.offsetWidth
+star.y=Math.random()*500
 star.layer=Math.floor(Math.random()*3)+1
 
-let size = star.layer
-
-star.style.width=size+"px"
-star.style.height=size+"px"
+star.style.width=star.layer+"px"
+star.style.height=star.layer+"px"
 
 star.style.left=star.x+"px"
 star.style.top=star.y+"px"
@@ -145,11 +154,11 @@ function moveStars(){
 
 stars.forEach(star=>{
 
-star.y += star.layer
+star.y+=star.layer
 
-if(star.y>600){
+if(star.y>500){
 star.y=0
-star.x=Math.random()*800
+star.x=Math.random()*game.offsetWidth
 }
 
 star.style.top=star.y+"px"
@@ -158,19 +167,25 @@ star.style.top=star.y+"px"
 
 }
 
-// movimento nave
+// controles
 
-document.addEventListener("keydown",e=>{
+function moveLeft(){
 
-if(e.key==="ArrowLeft") playerX-=20
-if(e.key==="ArrowRight") playerX+=20
-if(e.code==="Space") shoot()
-
-playerX=Math.max(0,Math.min(740,playerX))
+playerX-=25
+playerX=Math.max(0,playerX)
 
 player.style.left=playerX+"px"
 
-})
+}
+
+function moveRight(){
+
+playerX+=25
+playerX=Math.min(game.offsetWidth-60,playerX)
+
+player.style.left=playerX+"px"
+
+}
 
 // tiro
 
@@ -180,7 +195,7 @@ let bullet=document.createElement("div")
 bullet.className="bullet"
 
 bullet.x=playerX+27
-bullet.y=520
+bullet.y=430
 
 bullet.style.left=bullet.x+"px"
 bullet.style.top=bullet.y+"px"
@@ -188,12 +203,6 @@ bullet.style.top=bullet.y+"px"
 game.appendChild(bullet)
 
 bullets.push(bullet)
-
-// som tiro
-
-let sound=document.getElementById("shootSound")
-sound.currentTime=0
-sound.play()
 
 }
 
@@ -204,7 +213,7 @@ function spawnEnemy(){
 let enemy=document.createElement("div")
 enemy.className="enemy"
 
-enemy.x=Math.random()*760
+enemy.x=Math.random()*(game.offsetWidth-40)
 enemy.y=0
 
 enemy.style.left=enemy.x+"px"
@@ -218,35 +227,11 @@ enemies.push(enemy)
 
 setInterval(spawnEnemy,1200)
 
-// explosão
-
-function explosion(x,y){
-
-let boom=document.createElement("div")
-boom.className="explosion"
-
-boom.style.left=x+"px"
-boom.style.top=y+"px"
-
-game.appendChild(boom)
-
-setTimeout(()=>boom.remove(),300)
-
-// som explosão
-
-let sound=document.getElementById("explosionSound")
-sound.currentTime=0
-sound.play()
-
-}
-
-// loop jogo
+// loop
 
 function update(){
 
 moveStars()
-
-// tiros
 
 bullets.forEach((b,i)=>{
 
@@ -260,14 +245,12 @@ bullets.splice(i,1)
 
 })
 
-// inimigos
-
 enemies.forEach((e,ei)=>{
 
 e.y+=3
 e.style.top=e.y+"px"
 
-if(e.y>580){
+if(e.y>470){
 
 lives--
 document.getElementById("lives").innerText=lives
@@ -276,18 +259,11 @@ e.remove()
 enemies.splice(ei,1)
 
 if(lives<=0){
-
-document.getElementById("gameoverSound").play()
-
 alert("GAME OVER")
-
 location.reload()
-
 }
 
 }
-
-// colisão
 
 bullets.forEach((b,bi)=>{
 
@@ -297,8 +273,6 @@ b.x+6 > e.x &&
 b.y < e.y+40 &&
 b.y+15 > e.y
 ){
-
-explosion(e.x,e.y)
 
 e.remove()
 b.remove()

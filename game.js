@@ -1,159 +1,107 @@
-const canvas = document.getElementById("game")
-const ctx = canvas.getContext("2d")
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
+let player = {
+x: 380,
+y: 500,
+width: 60,
+height: 60,
+speed: 7
+};
 
-let gameRunning = false
+let asteroids = [];
+let score = 0;
+let gameRunning = false;
 
-let shipImg = new Image()
-shipImg.src = "images/ship.png"
+const playerImg = new Image();
+playerImg.src = "images/R.png";
 
-let meteorImg = new Image()
-meteorImg.src = "images/meteor.png"
-
-let explosionSound = new Audio("sounds/explosion.wav")
-
-let stars = []
-
-for(let i=0;i<200;i++){
-
-stars.push({
-
-x:Math.random()*canvas.width,
-y:Math.random()*canvas.height,
-speed:1+Math.random()*2
-
-})
-
-}
-
-let ship = {
-
-x:200,
-y:300,
-size:60,
-speed:6
-
-}
-
-let meteors = []
-let score = 0
-let difficulty = 1
+const asteroidImg = new Image();
+asteroidImg.src = "images/1335902-middle.png";
 
 function startGame(){
 
-document.getElementById("menu").style.display="none"
-gameRunning = true
+document.getElementById("menu").style.display = "none";
+
+gameRunning = true;
+
+spawnAsteroid();
+
+gameLoop();
 
 }
 
-function spawnMeteor(){
+function spawnAsteroid(){
 
-meteors.push({
+setInterval(()=>{
 
-x:Math.random()*canvas.width,
-y:-100,
-size:60,
-speed:2+difficulty
+asteroids.push({
 
-})
+x:Math.random()*760,
+y:-60,
+width:60,
+height:60,
+speed:3+Math.random()*3
+
+});
+
+},1000);
 
 }
 
-setInterval(spawnMeteor,1200)
+document.addEventListener("keydown",(e)=>{
 
-const keys = {}
+if(e.key==="ArrowLeft"){
+player.x-=player.speed;
+}
 
-document.addEventListener("keydown",e=>keys[e.key]=true)
-document.addEventListener("keyup",e=>keys[e.key]=false)
+if(e.key==="ArrowRight"){
+player.x+=player.speed;
+}
 
-canvas.addEventListener("touchmove",function(e){
-
-let touch = e.touches[0]
-
-ship.x = touch.clientX
-ship.y = touch.clientY
-
-})
+});
 
 function update(){
 
-if(!gameRunning) return
+asteroids.forEach(a=>{
+a.y+=a.speed;
+});
 
-if(keys["ArrowUp"]) ship.y -= ship.speed
-if(keys["ArrowDown"]) ship.y += ship.speed
-if(keys["ArrowLeft"]) ship.x -= ship.speed
-if(keys["ArrowRight"]) ship.x += ship.speed
+asteroids = asteroids.filter(a=>{
 
-meteors.forEach(m=>{
-
-m.y += m.speed
-
-if(
-
-ship.x < m.x + m.size &&
-ship.x + ship.size > m.x &&
-ship.y < m.y + m.size &&
-ship.y + ship.size > m.y
-
-){
-
-explosionSound.play()
-gameRunning=false
-alert("Game Over - Score: "+score)
-
+if(a.y>600){
+score++;
+document.getElementById("score").innerText=score;
+return false;
 }
 
-})
+return true;
 
-score++
-
-difficulty += 0.001
-
-document.getElementById("score").textContent = score
-
-}
-
-function drawStars(){
-
-ctx.fillStyle="white"
-
-stars.forEach(s=>{
-
-s.y += s.speed
-
-if(s.y > canvas.height) s.y = 0
-
-ctx.fillRect(s.x,s.y,2,2)
-
-})
+});
 
 }
 
 function draw(){
 
-ctx.clearRect(0,0,canvas.width,canvas.height)
+ctx.clearRect(0,0,canvas.width,canvas.height);
 
-drawStars()
+ctx.drawImage(playerImg,player.x,player.y,player.width,player.height);
 
-ctx.drawImage(shipImg,ship.x,ship.y,ship.size,ship.size)
+asteroids.forEach(a=>{
 
-meteors.forEach(m=>{
+ctx.drawImage(asteroidImg,a.x,a.y,a.width,a.height);
 
-ctx.drawImage(meteorImg,m.x,m.y,m.size,m.size)
-
-})
+});
 
 }
 
-function loop(){
+function gameLoop(){
 
-update()
-draw()
+if(!gameRunning) return;
 
-requestAnimationFrame(loop)
+update();
+draw();
+
+requestAnimationFrame(gameLoop);
 
 }
-
-loop()

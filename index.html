@@ -7,6 +7,7 @@
 <style>
 
 body{
+margin:0;
 background:black;
 color:white;
 text-align:center;
@@ -19,19 +20,34 @@ position:relative;
 width:800px;
 height:600px;
 margin:auto;
-background:black;
 border:2px solid white;
 overflow:hidden;
+background:black;
 }
+
+/* fundo estrelado */
+
+.star{
+position:absolute;
+width:2px;
+height:2px;
+background:white;
+opacity:0.8;
+}
+
+/* nave */
 
 #player{
 position:absolute;
-bottom:10px;
+bottom:20px;
 left:370px;
 width:60px;
-height:20px;
-background:cyan;
+height:60px;
+background:url("https://i.imgur.com/7QZ6YQK.png");
+background-size:cover;
 }
+
+/* inimigos */
 
 .enemy{
 position:absolute;
@@ -40,11 +56,34 @@ height:40px;
 background:red;
 }
 
+/* boss */
+
+#boss{
+position:absolute;
+width:120px;
+height:120px;
+background:purple;
+top:50px;
+left:340px;
+}
+
+/* tiro */
+
 .bullet{
 position:absolute;
 width:6px;
 height:15px;
 background:yellow;
+}
+
+/* explosão */
+
+.explosion{
+position:absolute;
+width:40px;
+height:40px;
+background:orange;
+border-radius:50%;
 }
 
 </style>
@@ -58,87 +97,149 @@ background:yellow;
 <div id="player"></div>
 </div>
 
-<p>Score: <span id="score">0</span></p>
+<p>
+Score: <span id="score">0</span> |
+Vidas: <span id="lives">3</span>
+</p>
 
 <script>
 
 const game = document.getElementById("game")
 const player = document.getElementById("player")
-let score = 0
 
 let playerX = 370
+let score = 0
+let lives = 3
 
 let bullets = []
 let enemies = []
 
-// MOVIMENTO
-document.addEventListener("keydown", e => {
+let boss = null
+let bossLife = 20
 
-if(e.key === "ArrowLeft"){
-playerX -= 20
+// estrelas
+
+function createStars(){
+
+for(let i=0;i<100;i++){
+
+let star = document.createElement("div")
+star.className="star"
+
+star.x = Math.random()*800
+star.y = Math.random()*600
+
+star.style.left=star.x+"px"
+star.style.top=star.y+"px"
+
+game.appendChild(star)
+
+setInterval(()=>{
+star.y += 1
+if(star.y>600) star.y=0
+star.style.top=star.y+"px"
+},30)
+
 }
 
-if(e.key === "ArrowRight"){
-playerX += 20
 }
 
-if(e.code === "Space"){
-shoot()
-}
+createStars()
 
-playerX = Math.max(0,Math.min(740,playerX))
-player.style.left = playerX + "px"
+// movimento
+
+document.addEventListener("keydown",e=>{
+
+if(e.key==="ArrowLeft") playerX-=20
+if(e.key==="ArrowRight") playerX+=20
+if(e.code==="Space") shoot()
+
+playerX=Math.max(0,Math.min(740,playerX))
+
+player.style.left=playerX+"px"
 
 })
 
-// TIRO
+// tiro
+
 function shoot(){
 
-let bullet = document.createElement("div")
-bullet.className = "bullet"
+let bullet=document.createElement("div")
+bullet.className="bullet"
 
-bullet.x = playerX + 27
-bullet.y = 540
+bullet.x=playerX+27
+bullet.y=520
 
-bullet.style.left = bullet.x + "px"
-bullet.style.top = bullet.y + "px"
+bullet.style.left=bullet.x+"px"
+bullet.style.top=bullet.y+"px"
 
 game.appendChild(bullet)
-
 bullets.push(bullet)
 
 }
 
-// INIMIGOS
+// inimigos
+
 function spawnEnemy(){
 
-let enemy = document.createElement("div")
-enemy.className = "enemy"
+if(score>30) return
 
-enemy.x = Math.random()*760
-enemy.y = 0
+let enemy=document.createElement("div")
+enemy.className="enemy"
 
-enemy.style.left = enemy.x + "px"
-enemy.style.top = enemy.y + "px"
+enemy.x=Math.random()*760
+enemy.y=0
+
+enemy.style.left=enemy.x+"px"
+enemy.style.top=enemy.y+"px"
 
 game.appendChild(enemy)
-
 enemies.push(enemy)
 
 }
 
 setInterval(spawnEnemy,1200)
 
-// LOOP
+// explosão
+
+function explosion(x,y){
+
+let boom=document.createElement("div")
+boom.className="explosion"
+
+boom.style.left=x+"px"
+boom.style.top=y+"px"
+
+game.appendChild(boom)
+
+setTimeout(()=>boom.remove(),300)
+
+}
+
+// boss
+
+function spawnBoss(){
+
+boss=document.createElement("div")
+boss.id="boss"
+
+boss.x=340
+boss.y=50
+
+game.appendChild(boss)
+
+}
+
 function update(){
 
 // tiros
+
 bullets.forEach((b,i)=>{
 
-b.y -= 10
-b.style.top = b.y + "px"
+b.y-=10
+b.style.top=b.y+"px"
 
-if(b.y < 0){
+if(b.y<0){
 b.remove()
 bullets.splice(i,1)
 }
@@ -146,20 +247,37 @@ bullets.splice(i,1)
 })
 
 // inimigos
+
 enemies.forEach((e,ei)=>{
 
-e.y += 3
-e.style.top = e.y + "px"
+e.y+=3
+e.style.top=e.y+"px"
 
-// colisão
+if(e.y>580){
+
+lives--
+document.getElementById("lives").innerText=lives
+
+e.remove()
+enemies.splice(ei,1)
+
+if(lives<=0){
+alert("GAME OVER")
+location.reload()
+}
+
+}
+
 bullets.forEach((b,bi)=>{
 
 if(
-b.x < e.x + 40 &&
-b.x + 6 > e.x &&
-b.y < e.y + 40 &&
-b.y + 15 > e.y
+b.x < e.x+40 &&
+b.x+6 > e.x &&
+b.y < e.y+40 &&
+b.y+15 > e.y
 ){
+
+explosion(e.x,e.y)
 
 e.remove()
 b.remove()
@@ -168,13 +286,49 @@ enemies.splice(ei,1)
 bullets.splice(bi,1)
 
 score++
-document.getElementById("score").innerText = score
+document.getElementById("score").innerText=score
+
+if(score===30) spawnBoss()
 
 }
 
 })
 
 })
+
+// boss
+
+if(boss){
+
+boss.x += Math.sin(Date.now()/300)*2
+boss.style.left=boss.x+"px"
+
+bullets.forEach((b,bi)=>{
+
+if(
+b.x < boss.x+120 &&
+b.x+6 > boss.x &&
+b.y < boss.y+120 &&
+b.y+15 > boss.y
+){
+
+b.remove()
+bullets.splice(bi,1)
+
+bossLife--
+
+explosion(boss.x+40,boss.y+40)
+
+if(bossLife<=0){
+alert("VOCÊ VENCEU!")
+location.reload()
+}
+
+}
+
+})
+
+}
 
 requestAnimationFrame(update)
 
@@ -186,4 +340,3 @@ update()
 
 </body>
 </html>
-🎮 Controles
